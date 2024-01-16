@@ -1,0 +1,90 @@
+{% extends "./frame.html" %}
+{% load static %}
+{% block content %}
+    <section class="breadcrumb-section">
+      <h2 class="sr-only">Site Breadcrumb</h2>
+      <div class="container">
+        <div class="breadcrumb-contents">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+              <li class="breadcrumb-item active">News</li>
+              <li class="breadcrumb-item active"><span class="toolbar-status"> Page {{ allNews.number }} of {{ allNews.paginator.num_pages }}</span></li>
+            </ol>
+          </nav>
+
+        </div>
+      </div>
+    </section>
+    <section class="inner-page-sec-padding-bottom space-db--30">
+      <div class="container">
+          {% if request.user.is_staff %}
+          <h2>add news</h2>
+          {% endif %}
+        <div class="row space-db-lg--60 space-db--30">
+          {% for news in allNews %}
+          <div class="col-lg-4 col-md-6 mb-lg--60 mb--30">
+            <div class="blog-card card-style-grid">
+              <a href="{% url 'newsDetails' title=news.title%}" class="image d-block">
+                <img height="250px" style="object-fit: cover;" src="{{ news.image.url }}" alt="">
+              </a>
+              <div class="card-content">
+                <h3 class="title"><a href="{% url 'newsDetails' title=news.title%}">{{ news.title|truncatechars:35 }}</a></h3>
+                <p class="post-meta"><span>{{ news.published_date }} </span></p>
+                <article>
+                  <h2 class="sr-only">
+                    Blog Article
+                  </h2>
+                  <p>{{ news.content|truncatechars:300 }}</p>
+                  <a href="{% url 'newsDetails' title=news.title%}" class="blog-link">Read More</a>
+                </article>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- Pagination Block -->
+				<div class="row pt--30">
+					<div class="col-md-12">
+						<div class="pagination-block">
+							<ul class="pagination-btns flex-center">
+<!--								Previous pages-->
+                                {% if allNews.has_previous %}
+								<li><a href="?page=1" class="single-btn prev-btn ">|<i class="zmdi zmdi-chevron-left"></i> </a>	</li>
+								<li><a href="?page={{ allNews.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn prev-btn "><i class="zmdi zmdi-chevron-left"></i> </a></li>
+                                {% endif %}
+                                {% if allNews.previous_page_number > 1 %}
+                                <li><a href="?page={{ allNews.previous_page_number|add:-1 }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn">{{ allNews.previous_page_number|add:-1 }}</a></li>
+                                <li><a href="?page={{ allNews.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn">{{ allNews.previous_page_number }}</a></li>
+                                {% elif allNews.previous_page_number > 0 %}
+                                <li><a href="?page={{ allNews.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn">{{ allNews.previous_page_number }}</a></li>
+                                {% endif %}
+<!--								Current page-->
+								<li class="active"><a href="" class="single-btn">{{ allNews.number }}</a></li>
+<!--								Next pages-->
+                                {% if allNews.next_page_number == allNews.paginator.num_pages %}
+                                <li><a href="?page={{ allNews.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn">{{ allNews.next_page_number }}</a></li>
+								<li><a href="?page={{ allNews.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn next-btn"><i class="zmdi zmdi-chevron-right"></i></a></li>
+								<li><a href="?page={{ allNews.paginator.num_pages }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn next-btn"><i class="zmdi zmdi-chevron-right"></i>|</a></li>
+                                {% elif allNews.next_page_number == allNews.paginator.num_pages|add:-1 %}
+                                <li><a href="?page={{ allNews.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn">{{ allNews.next_page_number }}</a></li>
+                                <li><a href="?page={{ allNews.next_page_number|add:1 }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn">{{ allNews.number|add:2 }}</a></li>
+								<li><a href="?page={{ allNews.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn next-btn"><i class="zmdi zmdi-chevron-right"></i></a></li>
+								<li><a href="?page={{ allNews.paginator.num_pages }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn next-btn"><i class="zmdi zmdi-chevron-right"></i>|</a></li>
+								{% elif allNews.has_next %}
+                                <li><a href="?page={{ allNews.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn">{{ allNews.next_page_number }}</a></li>
+                                <li><a href="?page={{ allNews.next_page_number|add:1 }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn">{{ allNews.number|add:2 }}</a></li>
+								<li><a href="?page={{ allNews.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn next-btn"><i class="zmdi zmdi-chevron-right"></i></a>
+								</li>
+								<li><a href="?page={{ allNews.paginator.num_pages }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="single-btn next-btn"><i class="zmdi zmdi-chevron-right"></i>|</a>
+								</li>
+                                {% endif %}
+							</ul>
+						</div>
+					</div>
+				</div>
+      </div>
+    </section>
+
+  </div>
+{% endblock %}
