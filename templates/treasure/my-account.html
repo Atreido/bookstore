@@ -154,7 +154,6 @@
 											<h3>Billing Address</h3>
 											<address>
 												<p><strong>{{UserDetails.userdetails.firstname}} {{UserDetails.userdetails.lastname}}</strong></p>
-												<p>Mobile: {{UserDetails.userdetails.phone}}</p>
 											</address>
 											<div id="billing-form" class="mb-40">
 										<div class="checkout-form">
@@ -162,20 +161,24 @@
 										<div class="row">
 
 											<div class="col-md-6 col-12 mb--20">
-												<label>Town/City*</label>
-												<input type="text" placeholder="Town/City">
+												<label>Town/City</label>
+												<input type="text" placeholder="Town/City" value="{{UserDetails.userdetails.city}}">
 											</div>
 											<div class="col-md-6 col-12 mb--20">
-												<label>Region*</label>
-												<input type="text" placeholder="State">
+												<label>Region</label>
+												<input type="text" placeholder="State" value="{{UserDetails.userdetails.region}}">
 											</div>
 											<div class="col-12 mb--20">
-												<label>Address*</label>
-												<input type="text" placeholder="Address line">
+												<label>Address</label>
+												<input type="text" placeholder="Address line"  value="{{UserDetails.userdetails.phone}}">
 											</div>
 											<div class="col-md-6 col-12 mb--20">
-												<label>Zip Code*</label>
-												<input type="text" placeholder="Zip Code">
+												<label>Zip Code</label>
+												<input type="text" placeholder="Zip Code"  value="{{UserDetails.userdetails.zip}}">
+											</div>
+											<div class="col-md-6 col-12 mb--20">
+												<label>Mobile Phone</label>
+												<input type="text" placeholder="Mobile Phone"  value="{{UserDetails.userdetails.phone}}">
 											</div>
 										</div>
 										</form>

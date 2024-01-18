@@ -201,7 +201,15 @@ $('#myForm').submit();
 										<span class="fas fa-star "></span>
 									</div>
 									<div class="btn-block">
-										<a href="" class="btn btn-outlined">Add To Cart</a>
+
+										<form action="{% url 'basket:add' bookTitle=book.title %}" method="POST">{% csrf_token %}
+												<div class="add-cart-btn">
+														<input type="hidden" name="bookID" value="{{book.id}}">
+														<input type="hidden" name="qty" value="1">
+														<input type="hidden" name="url_from" value="{{ request.path }}">
+														<button type="submit" class="btn btn-outlined--primary"><span class="plus-icon">+</span> Add to Cart!</button>
+												</div>
+										</form>
 										<a href="" class="card-link"><i class="fas fa-heart"></i> Add To Wishlist</a>
 										<a href="" class="card-link"><i class="fas fa-random"></i> Add To Cart</a>
 									</div>
