@@ -2,7 +2,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
-from .models import Books, News, Comments, Categories, Discount, User, UserDetails
+from .models import Books, News, Comments, Categories, Orders, User, UserDetails
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
@@ -38,21 +38,50 @@ def register(request):
         pwd = request.POST['password']
         pwdr = request.POST['repeat-password']
         users = User.objects.all()
+        flag = True
         for user in users:
             if name == user.username:
+                flag = False
                 message = "Registration is not successfull! Such username alredy exists"
                 return render(request, 'treasure/register.html', {"basket_list": request.session.get('basket'), 'message': message})
             elif email == user.email:
+                flag = False
                 message = "Registration is not successfull! Such email is alredy registered"
                 return render(request, 'treasure/register.html', {"basket_list": request.session.get('basket'), 'message': message})
-            elif pwd == pwdr:
-                securePass = make_password(pwdr)
-                new_comment = User(username=name, email=email, password=securePass, is_superuser=0, is_staff=0, is_active=1)
-                new_comment.save()
-                return redirect('index')
-            else:
-                message = "Registration is not successfull! please check all fields"
+            elif pwd != pwdr:
+                flag = False
+                message = "Registration is not successfull! Entered paswords do not match"
                 return render(request, 'treasure/register.html', {"basket_list": request.session.get('basket'), 'message': message})
+        if flag:
+            if pwd == pwdr:
+                min_length = 8
+                if len(pwdr) < min_length:
+                    message = f"Password does not meet the requirements - it must be at least {min_length} characters long."
+                    return render(request, 'treasure/register.html',
+                                  {"basket_list": request.session.get('basket'), 'message': message})
+
+                # check for digit
+                elif sum(c.isdigit() for c in pwdr) < 1:
+                    message = "Password does not meet the requirements - it must contain at least 1 number."
+                    return render(request, 'treasure/register.html',
+                              {"basket_list": request.session.get('basket'), 'message': message})
+                # check for uppercase letter
+                elif not any(c.isupper() for c in pwdr):
+                    message = "Password does not meet the requirements - it must contain at least 1 uppercase letter."
+                    return render(request, 'treasure/register.html',
+                                  {"basket_list": request.session.get('basket'), 'message': message})
+                # check for lowercase letter
+                elif not any(c.islower() for c in pwdr):
+                    message = "Password does not meet the requirements - it must contain at least 1 lowercase letter."
+                    return render(request, 'treasure/register.html',
+                              {"basket_list": request.session.get('basket'), 'message': message})
+                else:
+                    securePass = make_password(pwdr)
+                    new_comment = User(username=name, email=email, password=securePass, is_superuser=0, is_staff=0,
+                                       is_active=1)
+                    new_comment.save()
+                    return redirect('index')
+
 
 
 def logout_view(request):
@@ -116,6 +145,12 @@ def contact(request):
     
     return render(request, 'treasure/contact.html', context=context)
 
+
+def order_complete(request):
+    context = {"basket_list": request.session.get('basket')}
+    context.update(get_categories())
+
+    return render(request, 'treasure/order_complete.html', context=context)
 
 def bookDetails(request, id=None):
     bookdetails = get_object_or_404(Books, title=id)
@@ -198,7 +233,63 @@ def cart(request):
     return render(request, 'treasure/cart.html', context=context)
 
 def checkout(request):
-    context = {"basket_list": request.session.get('basket')}
+    userdata = []
+
+    if request.user.is_authenticated:
+        userdata = User.objects.get(username=request.user.username)
+
+    session_data = request.session.get('basket')
+    id_set = []
+    qty = []
+    prices = []
+
+    if session_data != None:
+        for elem in session_data:
+            id_set.append(elem['bookID'])
+            qty.append(elem['qty'])
+
+    ordered = Books.objects.filter(id__in=id_set)
+
+    for product in ordered:
+        prices.append(product.price)
+
+    subtotal = [float(qty[i]) * float(prices[i]) for i in range(len(prices))]
+    objects = zip(ordered, qty)
+    total = sum(subtotal)
+
+    if request.method == 'POST':
+        firstname = request.POST['firstname']
+        lastname = request.POST['lastname']
+        email = request.POST['email']
+        phone = request.POST['phone']
+        address = request.POST['address']
+        city = request.POST['city']
+        region = request.POST['region']
+        zipcode = request.POST['zipcode']
+        notes = request.POST['notes']
+
+        order = Orders.objects.create(
+            firstname=firstname,
+            lastname=lastname,
+            email=email,
+            phone=phone,
+            address=address,
+            city=city,
+            region=region,
+            zip=zipcode,
+            notes=notes,
+        )
+        for booklist in ordered:
+            order.orderedBook.add(booklist.id)
+
+        del request.session['basket']
+
+        context = {"basket_list": request.session.get('basket'), "userdata": userdata, "objects": objects,
+                   "total": total}
+        context.update(get_categories())
+        return redirect('order_complete')
+
+    context = {"basket_list": request.session.get('basket'), "userdata": userdata, "objects": objects, "total": total}
     context.update(get_categories())
     
     return render(request, 'treasure/checkout.html', context=context)

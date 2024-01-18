@@ -6,6 +6,7 @@ class UserDetails(models.Model):
     firstname = models.CharField(max_length=50,  blank=True, verbose_name="Ім'я")
     lastname = models.CharField(max_length=75, blank=True, verbose_name="Прізвище")
     bankCard = models.CharField(max_length=75, blank=True, verbose_name="Номер банківської картки")
+    address = models.CharField(max_length=100, blank=True, verbose_name="Місто")
     city = models.CharField(max_length=75, blank=True, verbose_name="Місто")
     region = models.CharField(max_length=75, blank=True, verbose_name="Область")
     zip = models.CharField(max_length=10, blank=True, verbose_name="Поштовий Індекс")
@@ -90,25 +91,28 @@ class Comments(models.Model):
     rating = models.CharField(max_length=50, verbose_name="Рейтинг")
     email = models.EmailField(verbose_name="Email")
     def __str__(self): # замена вывода на админке
-        return f"{self.user.username} к посту '{self.posted.title}' написал: {self.comment[:10]}..."
+        return f"{self.name} к посту '{self.posted.title}' написал: {self.comment[:10]}..."
     class Meta:     # создание перевода
         verbose_name = "Коментар"
         verbose_name_plural = "Коментарі"
 
 
 class Orders(models.Model):
-    firstname = models.CharField(max_length=50,  blank=True, verbose_name="Ім'я")
-    lastname = models.CharField(max_length=75, blank=True, verbose_name="Прізвище")
+    firstname = models.CharField(max_length=50, verbose_name="Ім'я")
+    lastname = models.CharField(max_length=75, verbose_name="Прізвище")
     bankCard = models.CharField(max_length=75, blank=True, verbose_name="Номер банківської картки")
-    city = models.CharField(max_length=75, blank=True, verbose_name="Місто")
-    region = models.CharField(max_length=75, blank=True, verbose_name="Область")
-    zip = models.CharField(max_length=10, blank=True, verbose_name="Поштовий Індекс")
-    phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
-    notes = models.TextField(verbose_name="Коментар")
+    email = models.EmailField(max_length=75, verbose_name="email")
+    address = models.CharField(max_length=100, verbose_name="Адреса")
+    city = models.CharField(max_length=75, verbose_name="Місто")
+    region = models.CharField(max_length=75, verbose_name="Область")
+    zip = models.CharField(max_length=10, verbose_name="Поштовий Індекс")
+    phone = models.CharField(max_length=20, verbose_name="Телефон")
+    notes = models.TextField(blank=True, verbose_name="Коментар")
     orderedBook = models.ManyToManyField(Books, related_name="books")
+    user_id = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, verbose_name="користувач")
 
     def __str__(self):
-        return self.id
+        return self.email
     class Meta:
         verbose_name = "Замовлення"
         verbose_name_plural = "Замовлення"
